@@ -1,11 +1,9 @@
-package six.coding.exercise.service;
+package six.coding.exercise.service.rocket;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 import six.coding.exercise.domain.rocket.RocketStatus;
-import six.coding.exercise.service.rocket.RocketService;
-import six.coding.exercise.service.rocket.RocketServiceImpl;
 
 public class RocketServiceTest {
 

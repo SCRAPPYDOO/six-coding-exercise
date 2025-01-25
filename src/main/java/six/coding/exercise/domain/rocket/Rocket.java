@@ -2,7 +2,7 @@ package six.coding.exercise.domain.rocket;
 
 public class Rocket {
 
-    private String name;
+    private final String name;
     private RocketStatus status;
 
     private Rocket(String name, RocketStatus status) {

@@ -4,13 +4,12 @@ import reactor.core.publisher.Mono;
 import six.coding.exercise.domain.rocket.Rocket;
 import six.coding.exercise.domain.rocket.RocketStatus;
 
-import java.util.HashMap;
 import java.util.Map;
-
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RocketServiceImpl implements RocketService {
 
-    private final Map<String, Rocket> rocketRepository = new HashMap<>();
+    private final Map<String, Rocket> rocketRepository = new ConcurrentHashMap<>();
 
     @Override
     public Mono<Rocket> addNewRocket(final String name) {
