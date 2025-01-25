@@ -3,10 +3,18 @@ package six.coding.exercise.service.mission;
 import reactor.core.publisher.Mono;
 import six.coding.exercise.domain.mission.Mission;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class MissionServiceImpl implements MissionService {
+
+    private final Map<String, Mission> missionRepository = new ConcurrentHashMap<>();
 
     @Override
     public Mono<Mission> addMission(String missionName) {
-        return Mono.empty();
+        missionRepository.put(missionName,
+                Mission.builder().name(missionName).build());
+
+        return Mono.justOrEmpty(missionRepository.get(missionName));
     }
 }
