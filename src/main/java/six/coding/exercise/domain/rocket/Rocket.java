@@ -1,9 +1,12 @@
 package six.coding.exercise.domain.rocket;
 
+import six.coding.exercise.domain.mission.Mission;
+
 public class Rocket {
 
     private final String name;
     private RocketStatus status;
+    private Mission mission;
 
     private Rocket(String name, RocketStatus status) {
         this.name = name;
@@ -24,6 +27,14 @@ public class Rocket {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public Mission getMission() {
+        return mission;
+    }
+
+    public void setMission(Mission mission) {
+        this.mission = mission;
     }
 
     public static class Builder {

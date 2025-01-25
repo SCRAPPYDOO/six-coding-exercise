@@ -3,6 +3,7 @@ package six.coding.exercise.service.rocket;
 import reactor.core.publisher.Mono;
 import six.coding.exercise.domain.rocket.Rocket;
 import six.coding.exercise.domain.rocket.RocketStatus;
+import six.coding.exercise.exception.RocketNotFoundException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,5 +28,15 @@ public class RocketServiceImpl implements RocketService {
                     rocket.setStatus(newStatus);
                     return rocket;
                 });
+    }
+
+    @Override
+    public Mono<Rocket> getRocket(String rocketName) {
+
+        if(rocketRepository.containsKey(rocketName)) {
+            return Mono.just(rocketRepository.get(rocketName));
+        }
+
+        return Mono.error(RocketNotFoundException::new);
     }
 }
