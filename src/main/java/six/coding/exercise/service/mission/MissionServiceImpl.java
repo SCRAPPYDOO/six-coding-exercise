@@ -2,6 +2,7 @@ package six.coding.exercise.service.mission;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import six.coding.exercise.domain.mission.Mission;
 import six.coding.exercise.domain.mission.MissionStatus;
 import six.coding.exercise.domain.rocket.Rocket;
@@ -19,8 +20,12 @@ public class MissionServiceImpl implements MissionService {
 
     private final RocketService rocketService;
 
-    public MissionServiceImpl(RocketService rocketService) {
+    public MissionServiceImpl(RocketService rocketService, Sinks.Many<Rocket> rocketStatusSink) {
         this.rocketService = rocketService;
+
+        rocketStatusSink.asFlux()
+                .doOnNext(this::onRocketStatusChange)
+                .subscribe();
     }
 
     @Override
@@ -74,6 +79,16 @@ public class MissionServiceImpl implements MissionService {
         return Mono.empty();
     }
 
+    @Override
+    public Mono<Mission> getMission(final String name) {
+
+        if(missionRepository.containsKey(name)) {
+            return Mono.just(missionRepository.get(name));
+        }
+
+        return Mono.error(MissionNotFoundException::new);
+    }
+
     private Mission addRocketToMission(final Mission mission, final Rocket rocket) {
         if(mission.getRockets().isEmpty()) {
             if(RocketStatus.IN_REPAIR.equals(rocket.getStatus())) {
@@ -86,5 +101,21 @@ public class MissionServiceImpl implements MissionService {
 
         mission.getRockets().add(rocket);
         return mission;
+    }
+
+    private void onRocketStatusChange(final Rocket rocket) {
+        if(RocketStatus.IN_REPAIR.equals(rocket.getStatus())) {
+            missionRepository.values().stream()
+                    .filter(mission -> !mission.getRockets().isEmpty())
+                    .filter(mission -> mission.getRockets().stream().anyMatch(rocket1 -> rocket1.getName().equalsIgnoreCase(rocket.getName())))
+                    .findFirst()
+                    .ifPresent(mission -> mission.setStatus(MissionStatus.PENDING));
+        } else {
+            missionRepository.values().stream()
+                    .filter(mission -> !mission.getRockets().isEmpty())
+                    .filter(mission -> MissionStatus.PENDING.equals(mission.getStatus()) &&
+                            mission.getRockets().stream().map(Rocket::getStatus).noneMatch(RocketStatus.IN_REPAIR::equals))
+                    .forEach(mission -> mission.setStatus(MissionStatus.IN_PROGRESS));
+        }
     }
 }

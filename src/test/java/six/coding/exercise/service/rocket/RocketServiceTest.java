@@ -2,6 +2,7 @@ package six.coding.exercise.service.rocket;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 import six.coding.exercise.domain.rocket.RocketStatus;
 
@@ -11,7 +12,7 @@ public class RocketServiceTest {
 
     @BeforeAll
     public static void beforeAll() {
-        rocketService = new RocketServiceImpl();
+        rocketService = new RocketServiceImpl(Sinks.many().unicast().onBackpressureBuffer());
     }
 
     @Test
