@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 import six.coding.exercise.domain.mission.MissionStatus;
+import six.coding.exercise.domain.rocket.RocketStatus;
 
 public class MissionServiceTest {
 
@@ -37,6 +38,15 @@ public class MissionServiceTest {
     @Test
     public void changeMissionStatusTest() {
 
+        final String name = "Mars";
+        final MissionStatus missionStatus = MissionStatus.ENDED;
+
+        StepVerifier.create(missionService.addMission(name)
+                        .flatMap(mission -> missionService.changeMissionStatus(name, missionStatus)))
+                .expectNextMatches(mission ->
+                        mission.getName().equals(name) && missionStatus.equals(mission.getStatus()))
+                .expectComplete()
+                .verify();
     }
 
     @Test

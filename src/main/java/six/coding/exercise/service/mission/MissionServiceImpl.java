@@ -2,6 +2,7 @@ package six.coding.exercise.service.mission;
 
 import reactor.core.publisher.Mono;
 import six.coding.exercise.domain.mission.Mission;
+import six.coding.exercise.domain.mission.MissionStatus;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,5 +17,10 @@ public class MissionServiceImpl implements MissionService {
                 Mission.builder().name(missionName).build());
 
         return Mono.justOrEmpty(missionRepository.get(missionName));
+    }
+
+    @Override
+    public Mono<Mission> changeMissionStatus(String name, MissionStatus missionStatus) {
+        return Mono.empty();
     }
 }
