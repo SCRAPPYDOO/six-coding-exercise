@@ -18,7 +18,18 @@ public class Rocket {
         return status;
     }
 
+    public void setStatus(RocketStatus status) {
+        this.status = status;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static class Builder {
+
+        private Builder() {
+        }
 
         private String name;
 
