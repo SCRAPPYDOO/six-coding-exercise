@@ -27,4 +27,9 @@ public class MissionServiceImpl implements MissionService {
                     return mission;
                 });
     }
+
+    @Override
+    public Mono<Mission> addRocketToMission(String missionName, String rocketName) {
+        return Mono.empty();
+    }
 }

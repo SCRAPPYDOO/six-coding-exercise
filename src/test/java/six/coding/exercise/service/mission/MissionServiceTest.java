@@ -1,17 +1,17 @@
 package six.coding.exercise.service.mission;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 import six.coding.exercise.domain.mission.MissionStatus;
-import six.coding.exercise.domain.rocket.RocketStatus;
+import six.coding.exercise.exception.RocketNotFoundException;
 
 public class MissionServiceTest {
 
     private static MissionService missionService;
 
-    @BeforeAll
-    public static void beforeAll() {
+    @BeforeEach
+    public void beforeAll() {
         missionService = new MissionServiceImpl();
     }
 
@@ -33,6 +33,25 @@ public class MissionServiceTest {
     @Test
     public void addRocketToMissionTest() {
 
+        final String missionName = "Mars";
+        final String rocketName = "Dragon 73";
+
+        StepVerifier.create(missionService.addRocketToMission(missionName, rocketName))
+                .expectNextMatches(mission ->
+                        mission.getName().equals(missionName) && !mission.getRockets().isEmpty() &&
+                                mission.getRockets().stream().anyMatch(rocket -> rocketName.equalsIgnoreCase(rocket.getName())))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    public void addMissingRocketToMissionThrowsExceptionTest() {
+        final String missionName = "Venus";
+        final String rocketName = "Dragon 54";
+
+        StepVerifier.create(missionService.addRocketToMission(missionName, rocketName))
+                .expectError(RocketNotFoundException.class)
+                .verify();
     }
 
     @Test

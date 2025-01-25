@@ -8,4 +8,6 @@ public interface MissionService {
     Mono<Mission> addMission(String missionName);
 
     Mono<Mission> changeMissionStatus(String name, MissionStatus missionStatus);
+
+    Mono<Mission> addRocketToMission(String missionName, String rocketName);
 }
