@@ -1,43 +1,32 @@
 package six.coding.exercise.service.rocket;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import six.coding.exercise.domain.rocket.Rocket;
 import six.coding.exercise.domain.rocket.RocketStatus;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class RocketServiceImpl implements RocketService {
 
-    private final List<Rocket> rocketRepository = new ArrayList<>();
-
-    public RocketServiceImpl() {
-
-    }
+    private final Map<String, Rocket> rocketRepository = new HashMap<>();
 
     @Override
     public Mono<Rocket> addNewRocket(final String name) {
 
-        rocketRepository.add(Rocket.builder()
-                .name(name)
-                .build());
+        rocketRepository.put(name,
+                Rocket.builder().name(name).build());
 
-        return getRocketByName(name);
+        return Mono.justOrEmpty(rocketRepository.get(name));
     }
 
     @Override
     public Mono<Rocket> changeRocketStatus(final String rocketName, final RocketStatus newStatus) {
-        return getRocketByName(rocketName)
+        return Mono.justOrEmpty(rocketRepository.get(rocketName))
                 .map(rocket -> {
                     rocket.setStatus(newStatus);
                     return rocket;
                 });
-    }
-
-    private Mono<Rocket> getRocketByName(final String name) {
-        return Flux.fromStream(rocketRepository.stream())
-                .filter(rocket -> rocket.getName().equalsIgnoreCase(name))
-                .single();
     }
 }
