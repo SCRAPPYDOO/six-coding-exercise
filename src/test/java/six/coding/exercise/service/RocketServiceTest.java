@@ -27,4 +27,18 @@ public class RocketServiceTest {
                 .expectComplete()
                 .verify();
     }
+
+    @Test
+    public void changeRocketStatusTest() {
+
+        final String rocketName = "Dragon 2";
+        final RocketStatus newRocketStatus = RocketStatus.IN_REPAIR;
+
+        StepVerifier.create(rocketService.addNewRocket(rocketName)
+                        .flatMap(createdRocket -> rocketService.changeRocketStatus(rocketName, newRocketStatus)))
+                .expectNextMatches(rocket ->
+                        rocket.getName().equals(rocketName) && newRocketStatus.equals(rocket.getStatus()))
+                .expectComplete()
+                .verify();
+    }
 }
