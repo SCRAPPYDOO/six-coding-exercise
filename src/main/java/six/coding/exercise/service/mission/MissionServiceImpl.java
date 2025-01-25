@@ -80,6 +80,7 @@ public class MissionServiceImpl implements MissionService {
                 mission.setStatus(MissionStatus.PENDING);
             } else {
                 mission.setStatus(MissionStatus.IN_PROGRESS);
+                rocket.setStatus(RocketStatus.IN_SPACE);
             }
         }
 
