@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 import six.coding.exercise.domain.mission.MissionStatus;
+import six.coding.exercise.domain.rocket.RocketStatus;
 import six.coding.exercise.exception.MissionNotFoundException;
 import six.coding.exercise.exception.RocketAlreadyAssignedException;
 import six.coding.exercise.exception.RocketNotFoundException;
@@ -46,7 +47,28 @@ public class MissionServiceTest {
                         .flatMap(mission -> rocketService.addNewRocket(rocketName))
                         .flatMap(mission -> missionService.addRocketToMission(missionName, rocketName)))
                 .expectNextMatches(mission ->
-                        mission.getName().equals(missionName) && !mission.getRockets().isEmpty() &&
+                        mission.getName().equals(missionName) &&
+                                MissionStatus.IN_PROGRESS.equals(mission.getStatus()) &&
+                                !mission.getRockets().isEmpty() &&
+                                mission.getRockets().stream().anyMatch(rocket -> rocketName.equalsIgnoreCase(rocket.getName())))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    public void addRocketInRepairStatusToMissionShouldChangeMissionStatusToPendingTest() {
+
+        final String missionName = "Mars";
+        final String rocketName = "Dragon 73";
+
+        StepVerifier.create(missionService.addMission(missionName)
+                        .flatMap(mission -> rocketService.addNewRocket(rocketName))
+                        .flatMap(mission -> rocketService.changeRocketStatus(rocketName, RocketStatus.IN_REPAIR))
+                        .flatMap(mission -> missionService.addRocketToMission(missionName, rocketName)))
+                .expectNextMatches(mission ->
+                        mission.getName().equals(missionName) &&
+                                MissionStatus.PENDING.equals(mission.getStatus()) &&
+                                !mission.getRockets().isEmpty() &&
                                 mission.getRockets().stream().anyMatch(rocket -> rocketName.equalsIgnoreCase(rocket.getName())))
                 .expectComplete()
                 .verify();
