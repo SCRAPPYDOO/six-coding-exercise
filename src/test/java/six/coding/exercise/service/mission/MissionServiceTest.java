@@ -93,7 +93,7 @@ public class MissionServiceTest {
     public void changeMissionStatusTest() {
 
         final String name = "Mars";
-        final MissionStatus missionStatus = MissionStatus.ENDED;
+        final MissionStatus missionStatus = MissionStatus.IN_PROGRESS;
 
         StepVerifier.create(missionService.addMission(name)
                         .flatMap(mission -> missionService.changeMissionStatus(name, missionStatus)))
@@ -104,7 +104,27 @@ public class MissionServiceTest {
     }
 
     @Test
+    public void changeMissionStatusToEndedRocketsAreClearedTest() {
+
+        final String name = "Mars";
+        final MissionStatus missionStatus = MissionStatus.ENDED;
+        final String rocketName = "Dragon 54";
+
+        StepVerifier.create(missionService.addMission(name)
+                        .flatMap(mission -> rocketService.addNewRocket(rocketName))
+                        .flatMap(mission -> missionService.addRocketToMission(name, rocketName))
+                        .flatMap(mission -> missionService.changeMissionStatus(name, missionStatus)))
+                .expectNextMatches(mission ->
+                        mission.getName().equals(name) && missionStatus.equals(mission.getStatus()) && mission.getRockets().isEmpty())
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
     public void missionSummaryTest() {
 
+        StepVerifier.create(missionService.getMissionsSummary())
+                .expectError()
+                .verify();
     }
 }

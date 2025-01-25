@@ -1,15 +1,16 @@
 package six.coding.exercise.service.mission;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import six.coding.exercise.domain.mission.Mission;
 import six.coding.exercise.domain.mission.MissionStatus;
 import six.coding.exercise.domain.rocket.Rocket;
+import six.coding.exercise.domain.rocket.RocketStatus;
 import six.coding.exercise.exception.MissionNotFoundException;
 import six.coding.exercise.exception.RocketAlreadyAssignedException;
 import six.coding.exercise.service.rocket.RocketService;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MissionServiceImpl implements MissionService {
@@ -34,6 +35,11 @@ public class MissionServiceImpl implements MissionService {
     public Mono<Mission> changeMissionStatus(String name, MissionStatus missionStatus) {
         return Mono.justOrEmpty(missionRepository.get(name))
                 .map(mission -> {
+
+                    if(MissionStatus.ENDED.equals(missionStatus) && !mission.getStatus().equals(missionStatus)) {
+                        mission.getRockets().clear();
+                    }
+
                     mission.setStatus(missionStatus);
                     return mission;
                 });
@@ -41,6 +47,12 @@ public class MissionServiceImpl implements MissionService {
 
     @Override
     public Mono<Mission> addRocketToMission(String missionName, String rocketName) {
+
+        if(missionRepository.values().stream().map(Mission::getRockets)
+                .anyMatch(rockets -> rockets.stream().map(Rocket::getName)
+                        .anyMatch(s -> s.equalsIgnoreCase(rocketName)))) {
+            return Mono.error(RocketAlreadyAssignedException::new);
+        }
 
         if(missionRepository.containsKey(missionName)) {
 
@@ -50,8 +62,6 @@ public class MissionServiceImpl implements MissionService {
                 return Mono.just(mission);
             } else {
                 return rocketService.getRocket(rocketName)
-                        .filter(rocket -> Objects.isNull(rocket.getMission()) || rocket.getMission().getName().equalsIgnoreCase(mission.getName()))
-                        .switchIfEmpty(Mono.defer(() -> Mono.error(RocketAlreadyAssignedException::new)))
                         .map(rocket -> addRocketToMission(mission, rocket));
             }
         }
@@ -59,9 +69,21 @@ public class MissionServiceImpl implements MissionService {
         return Mono.error(MissionNotFoundException::new);
     }
 
+    @Override
+    public Publisher<?> getMissionsSummary() {
+        return Mono.empty();
+    }
+
     private Mission addRocketToMission(final Mission mission, final Rocket rocket) {
+        if(mission.getRockets().isEmpty()) {
+            if(RocketStatus.IN_REPAIR.equals(rocket.getStatus())) {
+                mission.setStatus(MissionStatus.PENDING);
+            } else {
+                mission.setStatus(MissionStatus.IN_PROGRESS);
+            }
+        }
+
         mission.getRockets().add(rocket);
-        rocket.setMission(mission);
         return mission;
     }
 }
