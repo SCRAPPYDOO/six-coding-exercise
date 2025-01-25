@@ -21,6 +21,10 @@ public class MissionServiceImpl implements MissionService {
 
     @Override
     public Mono<Mission> changeMissionStatus(String name, MissionStatus missionStatus) {
-        return Mono.empty();
+        return Mono.justOrEmpty(missionRepository.get(name))
+                .map(mission -> {
+                    mission.setStatus(missionStatus);
+                    return mission;
+                });
     }
 }
