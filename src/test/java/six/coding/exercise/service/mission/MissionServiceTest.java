@@ -57,7 +57,8 @@ public class MissionServiceTest {
                         mission.getName().equals(missionName) &&
                                 MissionStatus.IN_PROGRESS.equals(mission.getStatus()) &&
                                 !mission.getRockets().isEmpty() &&
-                                mission.getRockets().stream().anyMatch(rocket -> rocketName.equalsIgnoreCase(rocket.getName())))
+                                mission.getRockets().stream().anyMatch(rocket -> rocketName.equalsIgnoreCase(rocket.getName()) &&
+                                        RocketStatus.IN_SPACE.equals(rocket.getStatus())))
                 .expectComplete()
                 .verify();
     }
