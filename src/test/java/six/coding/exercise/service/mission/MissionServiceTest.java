@@ -188,8 +188,46 @@ public class MissionServiceTest {
     @Test
     public void missionSummaryTest() {
 
-        StepVerifier.create(missionService.getMissionsSummary())
-                .expectError()
+        final String mission1 = "Mars";
+        final String mission2 = "Luna1";
+        final String mission3 = "Double Landing";
+        final String mission4 = "Transit";
+        final String mission5 = "Luna2";
+        final String mission6 = "Vertical Landing";
+
+        StepVerifier.create(missionService.addMission(mission1)
+                                .flatMap(o -> missionService.addMission(mission2))
+                                .flatMap(o -> missionService.addMission(mission3))
+                                .flatMap(o -> missionService.addMission(mission4))
+                                .flatMap(o -> missionService.addMission(mission5))
+                                .flatMap(o -> missionService.addMission(mission6))
+                                .flatMap(o -> rocketService.addNewRocket("Dragon 1"))
+                                .flatMap(o -> rocketService.addNewRocket("Dragon 2"))
+                                .flatMap(o -> rocketService.addNewRocket("Red Dragon"))
+                                .flatMap(o -> rocketService.addNewRocket("Dragon XL"))
+                                .flatMap(o -> rocketService.addNewRocket("Falcon Heavy"))
+                                .flatMap(o -> missionService.changeMissionStatus(mission3, MissionStatus.ENDED))
+                                .flatMap(o -> missionService.changeMissionStatus(mission6, MissionStatus.ENDED))
+                                .flatMap(o -> missionService.addRocketToMission(mission2, "Dragon 1"))
+                                .flatMap(o -> missionService.addRocketToMission(mission2, "Dragon 2"))
+                                .flatMap(o -> missionService.changeMissionStatus(mission2, MissionStatus.PENDING))
+                                .flatMap(o -> missionService.addRocketToMission(mission4, "Red Dragon"))
+                                .flatMap(o -> missionService.addRocketToMission(mission4, "Dragon XL"))
+                                .flatMap(o -> missionService.addRocketToMission(mission4, "Falcon Heavy"))
+                                .flatMapMany(o -> missionService.getMissionsSummary()))
+                .expectNextMatches(mission -> mission.getName().equals(mission4) && MissionStatus.IN_PROGRESS.equals(mission.getStatus()) &&
+                                mission.getRockets().size() == 3)
+                .expectNextMatches(mission -> mission.getName().equals(mission2) && MissionStatus.PENDING.equals(mission.getStatus()) &&
+                        mission.getRockets().size() == 2)
+                .expectNextMatches(mission -> mission.getName().equals(mission6) && MissionStatus.ENDED.equals(mission.getStatus()) &&
+                        mission.getRockets().isEmpty())
+                .expectNextMatches(mission -> mission.getName().equals(mission1) && MissionStatus.SCHEDULED.equals(mission.getStatus()) &&
+                        mission.getRockets().isEmpty())
+                .expectNextMatches(mission -> mission.getName().equals(mission5) && MissionStatus.SCHEDULED.equals(mission.getStatus()) &&
+                        mission.getRockets().isEmpty())
+                .expectNextMatches(mission -> mission.getName().equals(mission3) && MissionStatus.ENDED.equals(mission.getStatus()) &&
+                        mission.getRockets().isEmpty())
+                .expectComplete()
                 .verify();
     }
 }

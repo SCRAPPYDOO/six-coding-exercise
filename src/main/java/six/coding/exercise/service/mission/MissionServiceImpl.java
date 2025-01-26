@@ -1,6 +1,7 @@
 package six.coding.exercise.service.mission;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import six.coding.exercise.domain.mission.Mission;
@@ -75,8 +76,8 @@ public class MissionServiceImpl implements MissionService {
     }
 
     @Override
-    public Publisher<?> getMissionsSummary() {
-        return Mono.empty();
+    public Flux<Mission> getMissionsSummary() {
+        return Flux.empty();
     }
 
     @Override
