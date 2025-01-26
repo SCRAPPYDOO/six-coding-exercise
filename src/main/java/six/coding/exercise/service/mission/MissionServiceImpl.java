@@ -12,6 +12,7 @@ import six.coding.exercise.exception.MissionNotFoundException;
 import six.coding.exercise.exception.RocketAlreadyAssignedException;
 import six.coding.exercise.service.rocket.RocketService;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -77,7 +78,11 @@ public class MissionServiceImpl implements MissionService {
 
     @Override
     public Flux<Mission> getMissionsSummary() {
-        return Flux.empty();
+        return Flux.fromStream(missionRepository.values().stream())
+                .sort(Comparator.<Mission>comparingInt(o -> o.getRockets().size())
+                        .thenComparing(Mission::getName)
+                        .reversed());
+
     }
 
     @Override
