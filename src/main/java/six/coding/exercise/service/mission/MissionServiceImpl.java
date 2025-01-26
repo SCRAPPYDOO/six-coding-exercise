@@ -96,13 +96,14 @@ public class MissionServiceImpl implements MissionService {
     }
 
     private Mission addRocketToMission(final Mission mission, final Rocket rocket) {
-        if(mission.getRockets().isEmpty()) {
-            if(RocketStatus.IN_REPAIR.equals(rocket.getStatus())) {
-                mission.setStatus(MissionStatus.PENDING);
-            } else {
-                mission.setStatus(MissionStatus.IN_PROGRESS);
-                rocket.setStatus(RocketStatus.IN_SPACE);
-            }
+        if(RocketStatus.IN_REPAIR.equals(rocket.getStatus())) {
+            mission.setStatus(MissionStatus.PENDING);
+        } else {
+            rocket.setStatus(RocketStatus.IN_SPACE);
+        }
+
+        if(mission.getRockets().isEmpty() && !RocketStatus.IN_REPAIR.equals(rocket.getStatus())) {
+            mission.setStatus(MissionStatus.IN_PROGRESS);
         }
 
         mission.getRockets().add(rocket);
